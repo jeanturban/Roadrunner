@@ -2,8 +2,7 @@ var elevator;
 var map;
 var infowindow = new google.maps.InfoWindow();
 var area = new google.maps.LatLng(63.3333333, -150.5);
-var directionsDisplay;
-var directionsService = new google.maps.DirectionsService();
+
 var elevations = [];
 
 function initialize() {
@@ -16,9 +15,7 @@ function initialize() {
   // Create an ElevationService
   elevator = new google.maps.ElevationService();
 
-  //direction services
-  directionsDisplay = new google.maps.DirectionsRenderer();
-  directionsDisplay.setMap(map);
+
 
   // Add a listener for the click event and call getElevation on that location
   google.maps.event.addListener(map, 'click', getElevation);
@@ -66,20 +63,7 @@ function handleNoGeolocation(errorFlag) {
   map.setCenter(options.position);
 }
 
-function calcRoute() {
-  var start = document.getElementById('start').value;
-  var end = document.getElementById('end').value;
-  var request = {
-      origin:start,
-      destination:end,
-      travelMode: google.maps.TravelMode.DRIVING
-  };
-  directionsService.route(request, function(response, status) {
-    if (status == google.maps.DirectionsStatus.OK) {
-      directionsDisplay.setDirections(response);
-    }
-  });
-}
+
 
 function getElevation(event) {
 
@@ -111,4 +95,6 @@ function getElevation(event) {
   });
 }
 
+
 google.maps.event.addDomListener(window, 'load', initialize);
+console.log(elevations);
