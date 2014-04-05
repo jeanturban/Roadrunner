@@ -22,6 +22,14 @@ function initialize() {
 
   // Add a listener for the click event and call getElevation on that location
   google.maps.event.addListener(map, 'click', getElevation);
+  google.maps.event.addListener(map, 'click', function(event){
+        var marker_position = event.latLng;   
+        marker = new google.maps.Marker({
+                map: map,
+                draggable: false
+            }); 
+       marker.setPosition(marker_position);
+});
  // Try HTML5 geolocation
   if(navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(function(position) {
@@ -92,13 +100,8 @@ function getElevation(event) {
 
       // Retrieve the first result
       if (results[0]) {
-
-        // Open an info window indicating the elevation at the clicked position
-        infowindow.setContent('The elevation at this point <br>is ' + results[0].elevation + ' meters.');
         elevations.push(results[0].elevation);
         console.log(elevations);
-        infowindow.setPosition(clickedLocation);
-        infowindow.open(map);
       } else {
         alert('No results found');
       }
