@@ -28,64 +28,36 @@ $(function() {
 Map implemention
 */
 
-
-/*
-Initializes the map
-Centered at the given parameters
-*/
-function initialize() {
-        var mapOptions = {
-          center: new google.maps.LatLng(-34.397, 150.644),
-          zoom: 8
-        };
-        var map = new google.maps.Map(document.getElementById("map-canvas"),
-            mapOptions);
-      }
-      google.maps.event.addDomListener(window, 'load', initialize);
-
-/* End initializing map */
-
+//direction services
 var directionsDisplay;
 var directionsService = new google.maps.DirectionsService();
-var elevator;
-var map;
-var infowindow = new google.maps.InfoWindow();
 
-var elevations = [];
+//longitude-latitude array declaration
 var coordslat = [];
 var coordslng = [];
 
+/*
+Initializes the map
+Centered at the geolocation or in some cases, given location
+*/
+var map;
+
 function initialize() {
-  directionsDisplay = new google.maps.DirectionsRenderer();
   var mapOptions = {
-    zoom: 8,
-    mapTypeId: 'terrain'
-  }
+    zoom: 6
+  };
   map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
-  // Create an ElevationService
-  elevator = new google.maps.ElevationService();
-
-  // Add a listener for the click event and call getElevation on that location
-  google.maps.event.addListener(map, 'click', getElevation);
-  google.maps.event.addListener(map, 'click', function(event){
-        var marker_position = event.latLng;   
-        marker = new google.maps.Marker({
-                map: map,
-                draggable: false
-            }); 
-       marker.setPosition(marker_position);
-       coordslat.push(marker_position.lat());
-       coordslng.push(marker_position.lng());
-       console.log(coordslat);
-       console.log(coordslng);
-});
- // Try HTML5 geolocation
+  // Try HTML5 geolocation
   if(navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(function(position) {
-      var pos = new google.maps.LatLng(position.coords.latitude,
-                                       position.coords.longitude);
+      navigator.geolocation.getCurrentPosition(function(position) {
+        var pos = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
 
+      var infowindow = new google.maps.InfoWindow({
+        map: map,
+        position: pos,
+        content: 'Location found using HTML5.'
+      });
 
       map.setCenter(pos);
     }, function() {
@@ -95,19 +67,75 @@ function initialize() {
     // Browser doesn't support Geolocation
     handleNoGeolocation(false);
   }
-  
- directionsDisplay.setMap(map);
+    
+    //placing markers on map
+    
+    
+    
+    google.maps.event.addListener(map, 'click', function(event){
+        var marker_position = event.latLng;   
+        marker = new google.maps.Marker({
+                map: map,
+                draggable: false
+            }); 
+        marker.setPosition(marker_position);
 
+
+        //pushing latitudes and longitudes to respective array in start->end order
+        coordslat.push(marker_position.lat());
+        coordslng.push(marker_position.lng());
+
+
+
+        //debugging purposes
+        console.log(marker_position);
+
+    });
+       
+   
+    //directionsDisplay.setMap(map);
 }
 
+
+
+
+
+/* In case browser does not support geolocation */
+function handleNoGeolocation(errorFlag) {
+  if (errorFlag) {
+    var content = 'Error: The Geolocation service failed.';
+  } else {
+    var content = 'Error: Your browser doesn\'t support geolocation.';
+  }
+
+  var options = {
+    map: map,
+    position: new google.maps.LatLng(33, -118),
+    content: content
+  };
+
+  var infowindow = new google.maps.InfoWindow(options);
+  map.setCenter(options.position);
+}
+
+
+/* Loads the map */
+google.maps.event.addDomListener(window, 'load', initialize);
+
+
+/* 
+End initializing map 
+*/
+
+/* Calculates route */
 function calcRoute() {
   var start = new google.maps.LatLng(coordslat[0], coordslng[0]);
   var end = new google.maps.LatLng(coordslat[1], coordslng[1]);
   var request = {
-      origin:start,
-      destination:end,
-      provideRouteAlternatives:true,
-      travelMode: google.maps.TravelMode.WALKING
+    origin:start,
+    destination:end,
+    provideRouteAlternatives:true,
+    travelMode: google.maps.TravelMode.WALKING
   };
   directionsService.route(request, function(response, status) {
     if (status == google.maps.DirectionsStatus.OK) {
@@ -123,59 +151,3 @@ function calcRoute() {
     }
   });
 }
-
-
-function handleNoGeolocation(errorFlag) {
-  if (errorFlag) {
-    var content = 'Error: The Geolocation service failed.';
-  } else {
-    var content = 'Error: Your browser doesn\'t support geolocation.';
-  }
-
-  var options = {
-    map: map,
-    position: new google.maps.LatLng(60, 105),
-    content: content
-  };
-
-  var infowindow = new google.maps.InfoWindow(options);
-  map.setCenter(options.position);
-}
-
-
-
-function getElevation(event) {
-
-  var locations = [];
-
-  // Retrieve the clicked location and push it on the array
-  var clickedLocation = event.latLng;
-  locations.push(clickedLocation);
-
-  // Create a LocationElevationRequest object using the array's one value
-  var positionalRequest = {
-    'locations': locations
-  }
-
-  // Initiate the location request
-  elevator.getElevationForLocations(positionalRequest, function(results, status) {
-    if (status == google.maps.ElevationStatus.OK) {
-
-      // Retrieve the first result
-      if (results[0]) {
-        elevations.push(results[0].elevation);
-        console.log(elevations);
-      } else {
-        alert('No results found');
-      }
-    } else {
-      alert('Elevation service failed due to: ' + status);
-    }
-  });
-}
-
-
-google.maps.event.addDomListener(window, 'load', initialize);
-console.log(elevations);
-console.log(coordslng);
-console.log(coordslat);
