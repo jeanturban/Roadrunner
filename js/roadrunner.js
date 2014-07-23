@@ -45,7 +45,6 @@ var map;
 function initialize() {
   var mapOptions = {
     zoom: 6
-    mapTypeId: 'terrain'
   };
   map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
@@ -71,6 +70,8 @@ function initialize() {
     
     //placing markers on map
     
+    
+    
     google.maps.event.addListener(map, 'click', function(event){
         var marker_position = event.latLng;   
         marker = new google.maps.Marker({
@@ -79,17 +80,24 @@ function initialize() {
             }); 
         marker.setPosition(marker_position);
 
+
         //pushing latitudes and longitudes to respective array in start->end order
         coordslat.push(marker_position.lat());
         coordslng.push(marker_position.lng());
+
+
 
         //debugging purposes
         console.log(marker_position);
 
     });
        
+   
     //directionsDisplay.setMap(map);
 }
+
+
+
 
 
 /* In case browser does not support geolocation */
