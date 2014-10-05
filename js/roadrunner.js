@@ -207,4 +207,4 @@ function clearMap() {
 function resetMap() {
     initialize();
     destroyAll();
-}
+} 
